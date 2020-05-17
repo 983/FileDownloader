@@ -1,10 +1,10 @@
-# How does this work?
+# How do I use this?
 
 Go to [https://983.github.io/bookmarklet.htm](https://983.github.io/bookmarklet.htm) and follow the instructions.
 
 Alternatively, create a bookmark with [this content](https://raw.githubusercontent.com/983/FileDownloader/master/bookmarklet.js). The bookmark should point to `javascript:...`, not to `https://...bookmarklet.js`.
 
-# How does this work technically?
+# How does this work on a technical level?
 
 Instead of regular links like `https://...`, you can create links like
 
