@@ -1,5 +1,5 @@
 (function(){
-    
+
 var div = document.createElement('div');
 document.body.appendChild(div);
 
@@ -57,23 +57,23 @@ Zip.prototype.add = function(data, path){
     path = new TextEncoder().encode(path);
     var local = this.local;
     var central = this.central;
-    
+
     var localHeader = new Uint8Array(30);
     var centralHeader = new Uint8Array(46);
     var c = 0xffffffff;
-    
+
     for (var i = 0; i < data.length; i++){
         c = crcTable[(c ^ data[i]) & 0xff] ^ (c >>> 8);
     }
-    
+
     c = c ^ 0xffffffff;
-    
+
     localHeader.set([80, 75, 3, 4, 10]);
     writeInt(localHeader, 14, c);
     writeInt(localHeader, 18, data.length);
     writeInt(localHeader, 22, data.length);
     writeInt(localHeader, 26, path.length);
-    
+
     local.push(localHeader);
     local.push(path);
     local.push(data);
@@ -85,10 +85,10 @@ Zip.prototype.add = function(data, path){
     writeInt(centralHeader, 28, path.length);
     centralHeader[38] = 32;
     writeInt(centralHeader, 42, this.localSize);
-    
+
     central.push(centralHeader);
     central.push(path);
-    
+
     this.localSize += 30 + path.length + data.length;
     this.centralSize += 46 + path.length;
     this.n++;
@@ -99,7 +99,7 @@ Zip.prototype.toBytes = function(){
     var offset = 0;
     var data = new Uint8Array(this.localSize + this.centralSize + 22);
     var end = new Uint8Array(22);
-    
+
     end.set([80, 75, 5, 6]);
     writeInt(end, 8, this.n);
     writeInt(end, 10, this.n);
@@ -136,12 +136,23 @@ function getExtension(data){
     return "unknown";
 }
 
+var extensions = ["jpg", "jpeg", "gif", "svg", "webp", "png"];
+
 // download all urls
 var zip = new Zip();
 var urls = Array.from(document.getElementsByTagName("img"))
     .map(function(image){ return image.src})
-    .filter(function(x){ return x !== undefined;})
-    .filter(function(x){ return !x.startsWith("data:")});
+    .filter(function(x){ return x !== undefined})
+    .filter(function(x){ return !x.startsWith("data:")}
+);
+
+urls = urls.concat(
+    Array.from(document.getElementsByTagName("a"))
+    .map(function(a){ return a.href})
+    .filter(function(url){ return extensions.indexOf(url.toLowerCase().split(".").pop()) >= 0})
+);
+
+var name = "download-" + new Date().toISOString().replaceAll(":", "-").replace("T", "-").split(".")[0];
 
 // count finished downloads
 var counter = 0;
@@ -155,26 +166,26 @@ urls.forEach(function(url, k){
     r.onloadend = function(e){
         counter++;
         notify("Downloading " + r.url);
-        
+
         var data = new Uint8Array(e.target.response);
-        
+
         // example filename:
         // download/00001.png
-        var filename = "download/" + (zip.n + 1 + "").padStart(5, '0') + "." + getExtension(data);
-        
+        var filename = name + "/" + (zip.n + 1 + "").padStart(5, '0') + "." + getExtension(data);
+
         if (data.length === 0){
             notify("Failed to download " + r.url);
         }else{
             zip.add(data, filename);
         }
-        
+
         // when all downloads have finished, attach zip file to a clickable link and click it
         if (counter === urls.length){
             var a = document.createElement('a');
             var blob = new Blob([zip.toBytes()], {type: 'application/zip'});
             var url = URL.createObjectURL(blob);
             a.href = url;
-            a.download = 'download.zip';
+            a.download = name + '.zip';
             document.body.appendChild(a);
             a.style = 'display: none';
             a.click();
