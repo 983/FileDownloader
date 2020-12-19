@@ -14,7 +14,7 @@ javascript:alert('Hello, World!')
 
 to execute arbitrary javascript code in the context of the current website. You can even bookmark those links, which are then called a "bookmarklet".
 
-Clicking on the bookmarklet while on a random website will activate it. This bookmarklet then scans the website for all `<img>` tags and tries to download their `img.src` attribute into an `Uint8Array` via `XMLHttpRequest`. The downloaded data is then written into an uncompressed ZIP archive.
+Clicking on the bookmarklet while on a random website will activate it. This bookmarklet then scans the website for all `<img>` and `<a>` tags and tries to download their `img.src` or `a.href` attribute into an `Uint8Array` via `XMLHttpRequest`. The downloaded data is then written into an uncompressed ZIP archive.
 
 For information about the structure of a ZIP file, see [this documentation](https://users.cs.jmu.edu/buchhofp/forensics/formats/pkzip.html) [Backup link](https://web.archive.org/web/20200517162823/https://users.cs.jmu.edu/buchhofp/forensics/formats/pkzip.html).
 
